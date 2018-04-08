@@ -9,7 +9,7 @@ password = '<your password goes here>'
 url = 'https://<your url>.myshopify.com/admin/orders/count.json'
 
 def truncateDecimal(d, places =0):
-	return d.quantize(Decimal(10) ** -places, rounding=ROUND_DOWN)
+    return d.quantize(Decimal(10) ** -places, rounding=ROUND_DOWN)
 
 GPIO.setmode(GPIO.BOARD)
  
@@ -42,33 +42,30 @@ nums = {' ':[False,False,False,False,False,False,False],
     '8':[True,True,True,True,True,True,True],
     '9':[True,True,True,True,False,True,True]}
 
-	
-	
+
+
 def showNumber(num):
-	breakout = [truncateDecimal(Decimal(num%1000 /100))
-						,truncateDecimal(Decimal(num%100 / 10))
-						,num%10]	
-	
-	segmentsState = [False,False,False,False,False,False,False]
-	for eachDigit in range(3):
-		digitsState = [False,False,False]
-		digitsState[eachDigit] = True
-		for loop in range(7):
-			segmentsState[loop] = not nums[str(breakout[eachDigit])][loop]
-		GPIO.output(digits+segments,digitsState+segmentsState)
-		time.sleep(0.004)
-	
+    breakout = [truncateDecimal(Decimal(num%1000 /100))
+                        ,truncateDecimal(Decimal(num%100 / 10))
+                        ,num%10]
+
+    segmentsState = [False,False,False,False,False,False,False]
+    for eachDigit in range(3):
+        digitsState = [False,False,False]
+        digitsState[eachDigit] = True
+        for loop in range(7):
+            segmentsState[loop] = not nums[str(breakout[eachDigit])][loop]
+        GPIO.output(digits+segments,digitsState+segmentsState)
+
 try:
-	while True:
-		r = requests.get(url, auth=(apiKey, password))
-		response = r.json()
-		count = response['count']
-		start = time.time()
-		while True:
-			showNumber(count)
-			if time.time() - start >= updateTime:
-				break;
-			
-			
+    last_count = None
+    while True:
+        r = requests.get(url, auth=(apiKey, password))
+        response = r.json()
+        count = int(response['count'])
+        if count != last_count:
+            showNumber(count)
+            last_count = count
+        time.sleep(updateTime)
 finally:
-	GPIO.cleanup()
+    GPIO.cleanup()
