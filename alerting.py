@@ -56,19 +56,16 @@ def showNumber(num):
         for loop in range(7):
             segmentsState[loop] = not nums[str(breakout[eachDigit])][loop]
         GPIO.output(digits+segments,digitsState+segmentsState)
-        time.sleep(0.004)
 
 try:
+    last_count = None
     while True:
         r = requests.get(url, auth=(apiKey, password))
         response = r.json()
-        count = response['count']
-        start = time.time()
-        while True:
+        count = int(response['count'])
+        if count != last_count:
             showNumber(count)
-            if time.time() - start >= updateTime:
-                break;
-
-            
+            last_count = count
+        time.sleep(updateTime)
 finally:
     GPIO.cleanup()
